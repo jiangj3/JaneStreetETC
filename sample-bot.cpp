@@ -32,7 +32,7 @@ string buyBond(int id, int price, int size)
   return s;
 }
 
-string buyBond(int id, int price, int size)
+string sellBond(int id, int price, int size)
 {
   string s = "ADD " + to_string(id) + " BOND SELL " + to_string(price) + " " + to_string(size) + "\n";
   return s;
@@ -181,7 +181,22 @@ int main(int argc, char *argv[])
     int count=0;
     while(true) {
       std::string message = conn.read_from_exchange();
-      
+
+      if (std::string(message).find("OPEN") == 0) {
+        std::cout << "The round has started"<< 
+        '\n';
+      }
+
+      if (std::string(message).find("ACK") == 0)
+      {
+        std::cout << "successfully placed" << '\n';
+      }
+
+      if (std::string(message).find("FILL") == 0)
+      {
+        std::cout << "order filled" << '\n';
+      }
+
       if(count%20==0){
         conn.send_to_exchange(buyBond(id++, 999, 10));
         conn.send_to_exchange(sellBond(id++, 1001, 10));
