@@ -256,6 +256,7 @@ int main(int argc, char *argv[])
 
       tokens = parse(message);
       bool canBuy = true;
+      bool canSell = true;
       if(tokens[0] == "BOOK" && tokens[1] == "VALE"){
           
           canBuy = true;
@@ -271,25 +272,32 @@ int main(int argc, char *argv[])
                 break;
               }
             }
-          }
+          }//end if
 
           sellIndex = find(tokens.begin(), tokens.end(), "SELL") - tokens.begin();
-          string sellValeTuple = tokens[sellIndex+1];
-          for(int i=0;i<sellValeTuple.size();i++){
-            if(sellValeTuple[i]==':'){
-               sellColon = i;
-               break;
-            }
-          }
+          
+          string sellValeTuple = "";
+          if(sellIndex+1 < tokens.size()) = tokens[sellIndex+1];
+          canSell = true;
+          if(!isdigit(sellValeTuple[0]) || sellValeTuple=="") canSell = false;
+          if(canSell){
+                for(int i=0;i<sellValeTuple.size();i++){
+                    if(sellValeTuple[i]==':'){
+                      sellColon = i;
+                        break;
+                       }
+                 }
+          }//end if
+          
 
-          if(!isdigit(sellValeTuple[0]) || sellValeTuple=="") canBuy = false;
+          
 
           if(canBuy)
           {
             cout << "found value of " << firstValeTuple.substr(0, colon) << '\n';
             valeBuyPrice = stoi(firstValeTuple.substr(0, colon));
           }
-          if(canBuy){
+          if(canSell){
             cout << "Found vale sell pric eof " << sellValeTuple.substr(0, sellColon) << '\n';
             valeSellPrice = stoi(sellValeTuple.substr(0, sellColon));
           }
@@ -300,16 +308,28 @@ int main(int argc, char *argv[])
 
           canBuy = true;
           if(!isdigit(firstValbzTuple[0]) || firstValbzTuple=="") canBuy = false;
+          
+          if(canBuy){
           for(int i=0;i<firstValbzTuple.size();i++){
             if(firstValbzTuple[i]==':'){
                colon = i;
                break;
             }
           }
+          }//end for
           
           sellIndex = find(tokens.begin(), tokens.end(), "SELL") - tokens.begin();
-          string sellValbzTuple = tokens[sellIndex+1];
-          for(int i=0;i<sellValbzTuple.size();i++){
+          canSell = true;
+          
+          string sellValbzTuple = "";
+          if(sellIndex+1 < tokens.size()) sellValbzTuple = tokens[sellIndex+1];
+
+          if(!isdigit(sellValbzTuple[0]) || sellValbzTuple=="") canSell = false;
+          
+          
+          
+          if(canSell){
+              for(int i=0;i<sellValbzTuple.size();i++){
             if(sellValbzTuple[i] == ':'){
               sellColon =i;
               break;
@@ -317,7 +337,10 @@ int main(int argc, char *argv[])
 
           } 
 
-          if(!isdigit(sellValbzTuple[0]) || sellValbzTuple=="") canBuy = false;
+          }//edn if
+          
+
+          
 
 
           if(canBuy){
@@ -326,21 +349,21 @@ int main(int argc, char *argv[])
           }
 
 
-          if(canBuy) {
+          if(canSell) {
             cout << "valbz sell price of " << sellValbzTuple.substr(0, sellColon) << '\n';
             valbzSellPrice = stoi(sellValbzTuple.substr(0, sellColon));
           }
 
       }
 
-      if(valeBuyPrice < valbzSellPrice - buff && canBuy){
+      if(valeBuyPrice < valbzSellPrice - buff && canBuy && canSell && valeBuyPrice !=0 && valbzSellPrice!=0){
           conn.send_to_exchange(buyThing(id, "VALE", valeBuyPrice, 5));
           conn.send_to_exchange(convertADR(id, "VALE", "SELL", 5));
           conn.send_to_exchange(sellThing(id, "VALBZ", valbzSellPrice, 5));
           id++;
       }
 
-      if(valbzBuyPrice < valeSellPrice - buff && canBuy){
+      if(valbzBuyPrice < valeSellPrice - buff && canBuy && canSell && valbzBuyPrice!=0 && valeSellPrice!=0){
           conn.send_to_exchange(buyThing(id, "VALBZ", valbzBuyPrice, 5));
           conn.send_to_exchange(convertADR(id, "VALBZ", "BUY", 5));
           conn.send_to_exchange(sellThing(id, "VALE", valeSellPrice, 5));
