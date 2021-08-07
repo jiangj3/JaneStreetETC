@@ -16,7 +16,7 @@ using namespace std;
 #include <arpa/inet.h>
 #include <string.h>
 
-#include "helper.h"
+// #include "helper.h"
 
 /* C++ includes */
 #include <string>
@@ -25,6 +25,18 @@ using namespace std;
 #include <algorithm>
 #include <vector>
 #include <sstream>
+
+string buyBond(int id, int price, int size)
+{
+  string s = "ADD " + to_string(id) + " BOND BUY " + to_string(price) + " " + to_string(size) + "\n";
+  return s;
+}
+
+string buyBond(int id, int price, int size)
+{
+  string s = "ADD " + to_string(id) + " BOND SELL " + to_string(price) + " " + to_string(size) + "\n";
+  return s;
+}
 
 /* The Configuration class is used to tell the bot how to connect
    to the appropriate exchange. The `test_exchange_index` variable
@@ -171,8 +183,8 @@ int main(int argc, char *argv[])
       std::string message = conn.read_from_exchange();
       
       if(count%20==0){
-        conn.write_to_exchange(buyBond(id++, 999, 10));
-        conn.write_to_exchange(sellBond(id++, 1001, 10));
+        conn.send_to_exchange(buyBond(id++, 999, 10));
+        conn.send_to_exchange(sellBond(id++, 1001, 10));
       }
       
       
