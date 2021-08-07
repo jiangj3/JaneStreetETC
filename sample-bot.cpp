@@ -40,18 +40,23 @@ string sellBond(int id, int price, int size)
 
 string buyThing(int id, string name, int price, int size){
   string s = "ADD " + to_string(id) + " " + name + " BUY " + to_string(price) + " " + to_string(size) + "\n";
+  cout << s << '\n';
   return s;
 
 }
 
 string sellThing(int id, string name, int price, int size){
   string s = "ADD " + to_string(id) + " " + name + " SELL " + to_string(price) + " " + to_string(size) + "\n";
+  cout << s << '\n';
+
   return s;
 
 }
 
 string convertADR(int id, string name, string buySell,  int size){
   string s = "CONVERT " + to_string(id) + " " + name + " "  + buySell + " " + to_string(size) + "\n";
+  cout << s << '\n';
+
   return s;
 
 }
@@ -222,6 +227,7 @@ int main(int argc, char *argv[])
     int valbzSellPrice = 0;
     int valeBuyPrice = 0;
     int valeSellPrice = 0;
+    string firstValeTuple = "";
     int buff = 20;
 
     while(true) {
@@ -251,14 +257,19 @@ int main(int argc, char *argv[])
       tokens = parse(message);
       bool canBuy = true;
       if(tokens[0] == "BOOK" && tokens[1] == "VALE"){
-          string firstValeTuple = tokens[3];
+          
           canBuy = true;
-          if(!isdigit(firstValeTuple[0]) || firstValeTuple.size()==0) canBuy = false;
+          firstValeTuple = tokens[3];
+          if(!isdigit(firstValeTuple[0]) || firstValeTuple=="") {
+            canBuy = false;
+          }
 
-          for(int i=0;i<firstValeTuple.size();i++){
-            if(firstValeTuple[i]==':'){
-               colon = i;
-               break;
+          if (canBuy) {
+            for(int i=0;i<firstValeTuple.size();i++){
+              if(firstValeTuple[i]==':'){
+                colon = i;
+                break;
+              }
             }
           }
 
@@ -271,19 +282,24 @@ int main(int argc, char *argv[])
             }
           }
 
-          if(!isdigit(sellValeTuple[0]) || sellValeTuple.size()==0) canBuy = false;
+          if(!isdigit(sellValeTuple[0]) || sellValeTuple=="") canBuy = false;
 
-          //cout << "found value of " << firstValeTuple.substr(0, colon) << '\n';
-          if(canBuy) valeBuyPrice = stoi(firstValeTuple.substr(0, colon));
-          //cout << "Found vale sell pric eof " << sellValeTuple.substr(0, sellColon) << '\n';
-          if(canBuy) valeSellPrice = stoi(sellValeTuple.substr(0, sellColon));
+          if(canBuy)
+          {
+            cout << "found value of " << firstValeTuple.substr(0, colon) << '\n';
+            valeBuyPrice = stoi(firstValeTuple.substr(0, colon));
+          }
+          if(canBuy){
+            cout << "Found vale sell pric eof " << sellValeTuple.substr(0, sellColon) << '\n';
+            valeSellPrice = stoi(sellValeTuple.substr(0, sellColon));
+          }
       }
 
       if(tokens[0]=="BOOK" && tokens[1] == "VALBZ"){
         string firstValbzTuple = tokens[3];
 
           canBuy = true;
-          if(!isdigit(firstValbzTuple[0]) || firstValbzTuple.size()==0) canBuy = false;
+          if(!isdigit(firstValbzTuple[0]) || firstValbzTuple=="") canBuy = false;
           for(int i=0;i<firstValbzTuple.size();i++){
             if(firstValbzTuple[i]==':'){
                colon = i;
@@ -301,25 +317,30 @@ int main(int argc, char *argv[])
 
           } 
 
-          if(!isdigit(sellValbzTuple[0]) || sellValbzTuple.size()==0) canBuy = false;
+          if(!isdigit(sellValbzTuple[0]) || sellValbzTuple=="") canBuy = false;
 
 
-          cout << "valbz buy price of " << firstValbzTuple.substr(0, colon) << '\n'; 
-          if(canBuy) valbzBuyPrice = stoi(firstValbzTuple.substr(0, colon));
-          cout << "valbz sell price of " << sellValbzTuple.substr(0, sellColon) << '\n';
-          if(canBuy) valbzSellPrice = stoi(sellValbzTuple.substr(0, sellColon));
-          
+          if(canBuy){
+            cout << "valbz buy price of " << firstValbzTuple.substr(0, colon) << '\n';
+            valbzBuyPrice = stoi(firstValbzTuple.substr(0, colon));
+          }
+
+
+          if(canBuy) {
+            cout << "valbz sell price of " << sellValbzTuple.substr(0, sellColon) << '\n';
+            valbzSellPrice = stoi(sellValbzTuple.substr(0, sellColon));
+          }
 
       }
 
-      if(valeBuyPrice < valbzSellPrice - buff){
+      if(valeBuyPrice < valbzSellPrice - buff && canBuy){
           conn.send_to_exchange(buyThing(id, "VALE", valeBuyPrice, 5));
           conn.send_to_exchange(convertADR(id, "VALE", "SELL", 5));
           conn.send_to_exchange(sellThing(id, "VALBZ", valbzSellPrice, 5));
           id++;
       }
 
-      if(valbzBuyPrice < valeSellPrice - buff){
+      if(valbzBuyPrice < valeSellPrice - buff && canBuy){
           conn.send_to_exchange(buyThing(id, "VALBZ", valbzBuyPrice, 5));
           conn.send_to_exchange(convertADR(id, "VALBZ", "BUY", 5));
           conn.send_to_exchange(sellThing(id, "VALE", valeSellPrice, 5));
@@ -327,18 +348,12 @@ int main(int argc, char *argv[])
 
       }
 
+      if (std::string(message).find("ERROR") == 0)
+      {
+        std::cout << message << std::endl;
+        break;
+      }
 
-
-      
-
-
-
-      
-
-
-      
-      
-      
       if(std::string(message).find("CLOSE") == 0) {
         std::cout << "The round has ended" << std::endl;
         break;
@@ -346,10 +361,5 @@ int main(int argc, char *argv[])
       count++;
 
     }//end while
-
-
-
-
-
     return 0;
 }
