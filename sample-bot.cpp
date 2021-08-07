@@ -3,7 +3,7 @@
    2) Compile: g++ -o bot.exe bot.cpp
    3) Run in loop: while true; do ./bot.exe; sleep 1; done
 */
-
+// editing sample bot
 /* C includes for networking things */
 #include <stdlib.h>
 #include <stdio.h>
