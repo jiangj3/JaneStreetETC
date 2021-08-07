@@ -49,7 +49,7 @@ private:
     1 = slower
     2 = empty
   */
-  static int const test_exchange_index = 1;
+  static int const test_exchange_index = 0;
 public:
   std::string team_name;
   std::string exchange_hostname;
@@ -159,7 +159,7 @@ std::string join(std::string sep, std::vector<std::string> strs) {
 int main(int argc, char *argv[])
 {
     // Be very careful with this boolean! It switches between test and prod
-    bool test_mode = true;
+    bool test_mode = false;
     Configuration config(test_mode);
     Connection conn(config);
 
@@ -194,12 +194,12 @@ int main(int argc, char *argv[])
 
       if (std::string(message).find("FILL") == 0)
       {
-        std::cout << "order filled" << '\n';
+        std::cout << message << '\n';
       }
 
       if(count%20==0){
-        conn.send_to_exchange(buyBond(id++, 999, 10));
-        conn.send_to_exchange(sellBond(id++, 1001, 10));
+        conn.send_to_exchange(buyBond(id++, 999, 100));
+        conn.send_to_exchange(sellBond(id++, 1001, 100));
       }
       
       
