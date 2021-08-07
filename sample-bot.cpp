@@ -3,7 +3,7 @@
    2) Compile: g++ -o bot.exe bot.cpp
    3) Run in loop: while true; do ./bot.exe; sleep 1; done
 */
-// editing sample bot
+
 /* C includes for networking things */
 #include <stdlib.h>
 #include <stdio.h>
@@ -160,5 +160,12 @@ int main(int argc, char *argv[])
     conn.send_to_exchange(join(" ", data));
     std::string line = conn.read_from_exchange();
     std::cout << "The exchange replied: " << line << std::endl;
+    while(true) {
+      std::string message = conn.read_from_exchange();
+      if(std::string(message).find("CLOSE") == 0) {
+        std::cout << "The round has ended" << std::endl;
+        break;
+      }
+    }
     return 0;
 }
