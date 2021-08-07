@@ -5,6 +5,7 @@
 */
 
 /* C includes for networking things */
+using namespace std;
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -14,6 +15,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <string.h>
+
+#include "helper.h"
 
 /* C++ includes */
 #include <string>
@@ -34,7 +37,7 @@ private:
     1 = slower
     2 = empty
   */
-  static int const test_exchange_index = 2;
+  static int const test_exchange_index = 1;
 public:
   std::string team_name;
   std::string exchange_hostname;
@@ -166,6 +169,10 @@ int main(int argc, char *argv[])
         std::cout << "The round has ended" << std::endl;
         break;
       }
+
+
+
+
     }
     return 0;
 }
