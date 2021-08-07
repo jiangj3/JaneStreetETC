@@ -249,10 +249,12 @@ int main(int argc, char *argv[])
       // }
 
       tokens = parse(message);
-
+      bool canBuy = true;
       if(tokens[0] == "BOOK" && tokens[1] == "VALE"){
           string firstValeTuple = tokens[3];
-          
+          canBuy = true;
+          if(!isdigit(firstValeTuple[0]) || firstValeTuple.size()==0) canBuy = false;
+
           for(int i=0;i<firstValeTuple.size();i++){
             if(firstValeTuple[i]==':'){
                colon = i;
@@ -269,15 +271,19 @@ int main(int argc, char *argv[])
             }
           }
 
-          cout << "found value of " << firstValeTuple.substr(0, colon) << '\n';
-          valeBuyPrice = stoi(firstValeTuple.substr(0, colon));
-          cout << "Found vale sell pric eof " << sellValeTuple.substr(0, sellColon) << '\n';
-          valeSellPrice = stoi(sellValeTuple.substr(0, sellColon));
+          if(!isdigit(sellValeTuple[0]) || sellValeTuple.size()==0) canBuy = false;
+
+          //cout << "found value of " << firstValeTuple.substr(0, colon) << '\n';
+          if(canBuy) valeBuyPrice = stoi(firstValeTuple.substr(0, colon));
+          //cout << "Found vale sell pric eof " << sellValeTuple.substr(0, sellColon) << '\n';
+          if(canBuy) valeSellPrice = stoi(sellValeTuple.substr(0, sellColon));
       }
 
       if(tokens[0]=="BOOK" && tokens[1] == "VALBZ"){
         string firstValbzTuple = tokens[3];
 
+          canBuy = true;
+          if(!isdigit(firstValbzTuple[0]) || firstValbzTuple.size()==0) canBuy = false;
           for(int i=0;i<firstValbzTuple.size();i++){
             if(firstValbzTuple[i]==':'){
                colon = i;
@@ -293,10 +299,16 @@ int main(int argc, char *argv[])
               break;
             }
 
-          }
-          cout << "valbz buy price of " << firstValbzTuple.substr(0, colon) << '\n'; valbzBuyPrice = stoi(firstValbzTuple.substr(0, colon));
+          } 
+
+          if(!isdigit(sellValbzTuple[0]) || sellValbzTuple.size()==0) canBuy = false;
+
+
+          cout << "valbz buy price of " << firstValbzTuple.substr(0, colon) << '\n'; 
+          if(canBuy) valbzBuyPrice = stoi(firstValbzTuple.substr(0, colon));
           cout << "valbz sell price of " << sellValbzTuple.substr(0, sellColon) << '\n';
-          valbzSellPrice = stoi(sellValbzTuple.substr(0, sellColon));
+          if(canBuy) valbzSellPrice = stoi(sellValbzTuple.substr(0, sellColon));
+          
 
       }
 
