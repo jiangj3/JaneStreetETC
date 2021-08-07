@@ -25,9 +25,12 @@ test_exchange_index = 0
 prod_exchange_hostname = "production"
 
 port = 25000 + (test_exchange_index if test_mode else 0)
-exchange_hostname = "test-exch-" + team_name if test_mode else prod_exchange_hostname
+exchange_hostname = "test-exch-" + \
+    team_name if test_mode else prod_exchange_hostname
 
 # ~~~~~============== NETWORKING CODE ==============~~~~~
+
+
 def connect():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((exchange_hostname, port))
@@ -46,13 +49,13 @@ def read_from_exchange(exchange):
 # ~~~~~============== MAIN LOOP ==============~~~~~
 
 def act(exchange, id, name, bs, price, size):
-    write_to_exchange(exchange, {"type": "add", "order_id": id, "symbol": name, "dir": bs, "price": price, "size": size})
+    write_to_exchange(exchange, {"type": "add", "order_id": id,
+                      "symbol": name, "dir": bs, "price": price, "size": size})
 
 
 def convert(exchange, id, name, bs, size):
-    write_to_exchange(exchange, {"type": "convert", "order_id": id, "symbol": name, "dir": bs, "size": size})
-
-
+    write_to_exchange(exchange, {
+                      "type": "convert", "order_id": id, "symbol": name, "dir": bs, "size": size})
 
 
 def main():
@@ -64,9 +67,9 @@ def main():
     # Since many write messages generate marketdata, this will cause an
     # exponential explosion in pending messages. Please, don't do that!
     print("The exchange replied:", hello_from_exchange, file=sys.stderr)
-    
-    count=0
-    id=1
+
+    count = 0
+    id = 1
     while True:
         message = read_from_exchange(exchange)
         if message["type"] == "open":
@@ -78,16 +81,13 @@ def main():
             print("submitted order")
         if message["type"] == "fill":
             print(message)
-        if count%20==0 :
+        if count % 20 == 0:
             act(exchange, id, "BOND", "BUY", 999, 100)
-            act(exchange, id, "BOND", "SELL", 1001, 100)
             id+=1
+            act(exchange, id, "BOND", "SELL", 1001, 100)
+            id += 1
 
-        count+=1
-        
-
-
-
+        count += 1
 
 
 if __name__ == "__main__":
