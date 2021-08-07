@@ -40,22 +40,21 @@ string sellBond(int id, int price, int size)
 
 string buyThing(int id, string name, int price, int size){
   string s = "ADD " + to_string(id) + " " + name + " BUY " + to_string(price) + " " + to_string(size) + "\n";
-  cout << s << '\n';
+  //cout << s << '\n';
   return s;
 
 }
 
 string sellThing(int id, string name, int price, int size){
   string s = "ADD " + to_string(id) + " " + name + " SELL " + to_string(price) + " " + to_string(size) + "\n";
-  cout << s << '\n';
-
+  //cout << s << '\n';
   return s;
 
 }
 
 string convertADR(int id, string name, string buySell,  int size){
   string s = "CONVERT " + to_string(id) + " " + name + " "  + buySell + " " + to_string(size) + "\n";
-  cout << s << '\n';
+//  cout << s << '\n';
 
   return s;
 
@@ -64,7 +63,7 @@ string convertADR(int id, string name, string buySell,  int size){
 vector<string> parse(string s)
 {
   vector<string> v;
-  string tmp = "";
+  string tmp = "";  
   for (auto c : s)
   {
     if (c == ' ')
@@ -75,6 +74,7 @@ vector<string> parse(string s)
     else
       tmp += c;
   }
+  v.push_back(tmp);
   return v;
 }
 
@@ -89,7 +89,7 @@ private:
     1 = slower
     2 = empty
   */
-  static int const test_exchange_index = 0;
+  static int const test_exchange_index = 1;
 public:
   std::string team_name;
   std::string exchange_hostname;
@@ -154,8 +154,10 @@ public:
   /** Send a string to the server */
   void send_to_exchange(std::string input) {
     std::string line(input);
+    if(line=="" || line.size()<=1) return;
     /* All messages must always be uppercase */
     std::transform(line.begin(), line.end(), line.begin(), ::toupper);
+    cout << line;
     int res = fprintf(this->out, "%s\n", line.c_str());
     if (res < 0) {
       throw std::runtime_error("error sending to exchange");
@@ -228,7 +230,7 @@ int main(int argc, char *argv[])
     int valeBuyPrice = 0;
     int valeSellPrice = 0;
     string firstValeTuple = "";
-    int buff = 20;
+    int buff = 5;
 
     while(true) {
       std::string message = conn.read_from_exchange();
@@ -257,6 +259,7 @@ int main(int argc, char *argv[])
       tokens = parse(message);
       bool canBuy = true;
       bool canSell = true;
+
       if(tokens[0] == "BOOK" && tokens[1] == "VALE"){
           
           canBuy = true;
@@ -277,7 +280,7 @@ int main(int argc, char *argv[])
           sellIndex = find(tokens.begin(), tokens.end(), "SELL") - tokens.begin();
           
           string sellValeTuple = "";
-          if(sellIndex+1 < tokens.size()) = tokens[sellIndex+1];
+          if(sellIndex+1 < tokens.size()) sellValeTuple = tokens[sellIndex+1];
           canSell = true;
           if(!isdigit(sellValeTuple[0]) || sellValeTuple=="") canSell = false;
           if(canSell){
@@ -294,15 +297,16 @@ int main(int argc, char *argv[])
 
           if(canBuy)
           {
-            cout << "found value of " << firstValeTuple.substr(0, colon) << '\n';
+            //cout << "found value of " << firstValeTuple.substr(0, colon) << '\n';
             valeBuyPrice = stoi(firstValeTuple.substr(0, colon));
           }
           if(canSell){
-            cout << "Found vale sell pric eof " << sellValeTuple.substr(0, sellColon) << '\n';
+          //  cout << "Found vale sell pric eof " << sellValeTuple.substr(0, sellColon) << '\n';  
             valeSellPrice = stoi(sellValeTuple.substr(0, sellColon));
           }
       }
 
+        tokens = parse(message);
       if(tokens[0]=="BOOK" && tokens[1] == "VALBZ"){
         string firstValbzTuple = tokens[3];
 
@@ -324,6 +328,7 @@ int main(int argc, char *argv[])
           string sellValbzTuple = "";
           if(sellIndex+1 < tokens.size()) sellValbzTuple = tokens[sellIndex+1];
 
+          
           if(!isdigit(sellValbzTuple[0]) || sellValbzTuple=="") canSell = false;
           
           
@@ -355,27 +360,31 @@ int main(int argc, char *argv[])
           }
 
       }
+      
+   
 
-      if(valeBuyPrice < valbzSellPrice - buff && canBuy && canSell && valeBuyPrice !=0 && valbzSellPrice!=0){
-          conn.send_to_exchange(buyThing(id, "VALE", valeBuyPrice, 5));
-          conn.send_to_exchange(convertADR(id, "VALE", "SELL", 5));
-          conn.send_to_exchange(sellThing(id, "VALBZ", valbzSellPrice, 5));
-          id++;
+
+      if(valeBuyPrice < valbzSellPrice - buff &&  canBuy && canSell && valeBuyPrice !=0 && valbzSellPrice!=0){
+        
+          
+          conn.send_to_exchange(buyThing(id++, "VALE", valeBuyPrice, 5));
+          conn.send_to_exchange(convertADR(id++, "VALE", "SELL", 5));
+          conn.send_to_exchange(sellThing(id++, "VALBZ", valbzSellPrice, 5));
+  
       }
 
-      if(valbzBuyPrice < valeSellPrice - buff && canBuy && canSell && valbzBuyPrice!=0 && valeSellPrice!=0){
-          conn.send_to_exchange(buyThing(id, "VALBZ", valbzBuyPrice, 5));
-          conn.send_to_exchange(convertADR(id, "VALBZ", "BUY", 5));
-          conn.send_to_exchange(sellThing(id, "VALE", valeSellPrice, 5));
-          id++;
+      if(valbzBuyPrice < valeSellPrice - buff  && canBuy && canSell && valbzBuyPrice!=0 && valeSellPrice!=0){
+          conn.send_to_exchange(buyThing(id++, "VALBZ", valbzBuyPrice, 5));
+          conn.send_to_exchange(convertADR(id++, "VALE", "BUY", 5));
+          conn.send_to_exchange(sellThing(id++, "VALE", valeSellPrice, 5));
 
       }
 
-      if (std::string(message).find("ERROR") == 0)
-      {
-        std::cout << message << std::endl;
-        break;
-      }
+      // if (std::string(message).find("ERROR") == 0)
+      // {
+      //   std::cout << message << std::endl;
+      //   break;
+      // }
 
       if(std::string(message).find("CLOSE") == 0) {
         std::cout << "The round has ended" << std::endl;
