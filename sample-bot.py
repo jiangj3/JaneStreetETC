@@ -67,6 +67,7 @@ def main():
     
     count=0
     id=1
+    trade = []
     while True:
         message = read_from_exchange(exchange)
         if message["type"] == "open":
@@ -85,6 +86,16 @@ def main():
 
         count+=1
         
+
+        if(count%10==0):
+            write_to_exchange(exchange, {"type": "ADD", "symbol": "BOND", "dir": "BUY", "price": 999, "size": 100} )
+            id+=1
+            write_to_exchange(exchange, {"type": "ADD", "symbol": "BOND", "dir": "BUY", "price": 999, "size": 100} )
+            id+=1
+
+
+
+        count+=1
 
 
 
