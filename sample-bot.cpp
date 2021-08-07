@@ -38,28 +38,40 @@ string sellBond(int id, int price, int size)
   return s;
 }
 
-string buyThing(int id, String name, int price, int size){
+string buyThing(int id, string name, int price, int size){
   string s = "ADD " + to_string(id) + " " + name + " BUY " + to_string(price) + " " + to_string(size) + "\n";
   return s;
 
 }
 
-string sellThing(int id, String name, int price, int size){
+string sellThing(int id, string name, int price, int size){
   string s = "ADD " + to_string(id) + " " + name + " SELL " + to_string(price) + " " + to_string(size) + "\n";
   return s;
 
 }
 
-string convertADR(int id, String name, String buySell,  int size){
-  string s = "CONVERT " + to_string(id) + " " + name + " "  + buySell + " "+ to_string(price) + " " + to_string(size) + "\n";
+string convertADR(int id, string name, string buySell,  int size){
+  string s = "CONVERT " + to_string(id) + " " + name + " "  + buySell + " " + to_string(size) + "\n";
   return s;
 
 }
 
-
-
-
-
+vector<string> parse(string s)
+{
+  vector<string> v;
+  string tmp = "";
+  for (auto c : s)
+  {
+    if (c == ' ')
+    {
+      v.push_back(tmp);
+      tmp = "";
+    }
+    else
+      tmp += c;
+  }
+  return v;
+}
 
 /* The Configuration class is used to tell the bot how to connect
    to the appropriate exchange. The `test_exchange_index` variable
@@ -182,7 +194,7 @@ std::string join(std::string sep, std::vector<std::string> strs) {
 int main(int argc, char *argv[])
 {
     // Be very careful with this boolean! It switches between test and prod
-    bool test_mode = false;
+    bool test_mode = true;
     Configuration config(test_mode);
     Connection conn(config);
 
@@ -231,10 +243,10 @@ int main(int argc, char *argv[])
       }
 
       //bond strategy
-      if(count%20==0){
-        conn.send_to_exchange(buyBond(id++, 999, 100));
-        conn.send_to_exchange(sellBond(id++, 1001, 100));
-      }
+      // if(count%20==0){
+      //   conn.send_to_exchange(buyBond(id++, 999, 100));
+      //   conn.send_to_exchange(sellBond(id++, 1001, 100));
+      // }
 
       tokens = parse(message);
 
@@ -256,11 +268,11 @@ int main(int argc, char *argv[])
                break;
             }
           }
-          
 
+          cout << "found value of " << firstValeTuple.substr(0, colon) << '\n';
           valeBuyPrice = stoi(firstValeTuple.substr(0, colon));
+          cout << "Found vale sell pric eof " << sellValeTuple.substr(0, sellColon) << '\n';
           valeSellPrice = stoi(sellValeTuple.substr(0, sellColon));
-
       }
 
       if(tokens[0]=="BOOK" && tokens[1] == "VALBZ"){
@@ -282,10 +294,9 @@ int main(int argc, char *argv[])
             }
 
           }
-
-
-          valbzBuyPrice = stoi(firstValbzTuple.substr(0, colon));
-          valbzSellPrice = stoi(valbzSellTuple.substr(0, sellColon));
+          cout << "valbz buy price of " << firstValbzTuple.substr(0, colon) << '\n'; valbzBuyPrice = stoi(firstValbzTuple.substr(0, colon));
+          cout << "valbz sell price of " << sellValbzTuple.substr(0, sellColon) << '\n';
+          valbzSellPrice = stoi(sellValbzTuple.substr(0, sellColon));
 
       }
 
