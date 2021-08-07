@@ -16,7 +16,7 @@ using namespace std;
 #include <arpa/inet.h>
 #include <string.h>
 
-#include "helper.h"
+// #include "helper.h"
 
 /* C++ includes */
 #include <string>
@@ -165,6 +165,7 @@ int main(int argc, char *argv[])
     std::cout << "The exchange replied: " << line << std::endl;
     while(true) {
       std::string message = conn.read_from_exchange();
+      cout << message << '\n';
       if(std::string(message).find("CLOSE") == 0) {
         std::cout << "The round has ended" << std::endl;
         break;
