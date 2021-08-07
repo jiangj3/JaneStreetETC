@@ -16,7 +16,7 @@ using namespace std;
 #include <arpa/inet.h>
 #include <string.h>
 
-// #include "helper.h"
+#include "helper.h"
 
 /* C++ includes */
 #include <string>
@@ -163,17 +163,32 @@ int main(int argc, char *argv[])
     conn.send_to_exchange(join(" ", data));
     std::string line = conn.read_from_exchange();
     std::cout << "The exchange replied: " << line << std::endl;
+    
+    
+    int id=1;
+    int count=0;
     while(true) {
       std::string message = conn.read_from_exchange();
-      cout << message << '\n';
+      
+      if(count%20==0){
+        conn.write_to_exchange(buyBond(id++, 999, 10));
+        conn.write_to_exchange(sellBond(id++, 1001, 10));
+      }
+      
+      
+      
+      
       if(std::string(message).find("CLOSE") == 0) {
         std::cout << "The round has ended" << std::endl;
         break;
       }
+      count++;
+
+    }//end while
 
 
 
 
-    }
+
     return 0;
 }
