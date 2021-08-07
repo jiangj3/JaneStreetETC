@@ -38,6 +38,29 @@ string sellBond(int id, int price, int size)
   return s;
 }
 
+string buyThing(int id, String name, int price, int size){
+  string s = "ADD " + to_string(id) + " " + name + " BUY " + to_string(price) + " " + to_string(size) + "\n";
+  return s;
+
+}
+
+string sellThing(int id, String name, int price, int size){
+  string s = "ADD " + to_string(id) + " " + name + " SELL " + to_string(price) + " " + to_string(size) + "\n";
+  return s;
+
+}
+
+string convertADR(int id, String name, String buySell,  int size){
+  string s = "CONVERT " + to_string(id) + " " + name + " "  + buySell + " "+ to_string(price) + " " + to_string(size) + "\n";
+  return s;
+
+}
+
+
+
+
+
+
 /* The Configuration class is used to tell the bot how to connect
    to the appropriate exchange. The `test_exchange_index` variable
    only changes the Configuration when `test_mode` is set to `true`.
@@ -179,6 +202,16 @@ int main(int argc, char *argv[])
     
     int id=1;
     int count=0;
+    int sellColon =0;
+    int sellIndex=0;
+    vector<string> tokens;
+    int colon =0;
+    int valbzBuyPrice =0;
+    int valbzSellPrice = 0;
+    int valeBuyPrice = 0;
+    int valeSellPrice = 0;
+    int buff = 20;
+
     while(true) {
       std::string message = conn.read_from_exchange();
 
@@ -197,11 +230,89 @@ int main(int argc, char *argv[])
         std::cout << message << '\n';
       }
 
+      //bond strategy
       if(count%20==0){
         conn.send_to_exchange(buyBond(id++, 999, 100));
         conn.send_to_exchange(sellBond(id++, 1001, 100));
       }
+
+      tokens = parse(message);
+
+      if(tokens[0] == "BOOK" && tokens[1] == "VALE"){
+          string firstValeTuple = tokens[3];
+          
+          for(int i=0;i<firstValeTuple.size();i++){
+            if(firstValeTuple[i]==':'){
+               colon = i;
+               break;
+            }
+          }
+
+          sellIndex = find(tokens.begin(), tokens.end(), "SELL") - tokens.begin();
+          string sellValeTuple = tokens[sellIndex+1];
+          for(int i=0;i<sellValeTuple.size();i++){
+            if(sellValeTuple[i]==':'){
+               sellColon = i;
+               break;
+            }
+          }
+          
+
+          valeBuyPrice = stoi(firstValeTuple.substr(0, colon));
+          valeSellPrice = stoi(sellValeTuple.substr(0, sellColon));
+
+      }
+
+      if(tokens[0]=="BOOK" && tokens[1] == "VALBZ"){
+        string firstValbzTuple = tokens[3];
+
+          for(int i=0;i<firstValbzTuple.size();i++){
+            if(firstValbzTuple[i]==':'){
+               colon = i;
+               break;
+            }
+          }
+          
+          sellIndex = find(tokens.begin(), tokens.end(), "SELL") - tokens.begin();
+          string sellValbzTuple = tokens[sellIndex+1];
+          for(int i=0;i<sellValbzTuple.size();i++){
+            if(sellValbzTuple[i] == ':'){
+              sellColon =i;
+              break;
+            }
+
+          }
+
+
+          valbzBuyPrice = stoi(firstValbzTuple.substr(0, colon));
+          valbzSellPrice = stoi(valbzSellTuple.substr(0, sellColon));
+
+      }
+
+      if(valeBuyPrice < valbzSellPrice - buff){
+          conn.send_to_exchange(buyThing(id, "VALE", valeBuyPrice, 5));
+          conn.send_to_exchange(convertADR(id, "VALE", "SELL", 5));
+          conn.send_to_exchange(sellThing(id, "VALBZ", valbzSellPrice, 5));
+          id++;
+      }
+
+      if(valbzBuyPrice < valeSellPrice - buff){
+          conn.send_to_exchange(buyThing(id, "VALBZ", valbzBuyPrice, 5));
+          conn.send_to_exchange(convertADR(id, "VALBZ", "BUY", 5));
+          conn.send_to_exchange(sellThing(id, "VALE", valeSellPrice, 5));
+          id++;
+
+      }
+
+
+
       
+
+
+
+      
+
+
       
       
       
